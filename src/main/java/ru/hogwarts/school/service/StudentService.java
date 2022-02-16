@@ -16,7 +16,8 @@ public class StudentService {
 
     public Student createStudent(Student student) {
         student.setId(++lastId);
-        return students.put(lastId, student);
+        students.put(lastId, student);
+        return student;
     }
 
     public Student findStudent(long lastId) {
