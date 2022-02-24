@@ -1,47 +1,68 @@
 package ru.hogwarts.school.service;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import ru.hogwarts.school.exception.*;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.repository.FacultyRepository;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @Service
 public class FacultyService {
-    private final FacultyRepository facultyRepository;
 
-    public FacultyService(FacultyRepository facultyRepository) {
-        this.facultyRepository = facultyRepository;
+    private final FacultyRepository repository;
+
+    public FacultyService(FacultyRepository repository) {
+        this.repository = repository;
     }
 
     public Faculty createFaculty(Faculty faculty) {
-        return facultyRepository.save(faculty);
+        try {
+            return repository.save(faculty);
+        } catch (RuntimeException e) {
+            throw new UnableToCreateException();
+        }
     }
 
-    public ResponseEntity<Faculty> findFaculty(long id) {
-        Optional<Faculty> byId = facultyRepository.findById(id);
-        if (byId.isEmpty()) {
-            return ResponseEntity.notFound().build();
+    public Faculty findFaculty(long id) {
+        Optional<Faculty> optionalFaculty = repository.findById(id);
+        if (optionalFaculty.isEmpty()) {
+            throw new NotFoundException();
         }
-        return ResponseEntity.ok(byId.get());
+        return optionalFaculty.get();
     }
 
     public Faculty editFaculty(Faculty faculty) {
-        return facultyRepository.save(faculty);
+        try {
+            return repository.save(faculty);
+        } catch (RuntimeException e) {
+            throw new UnableToUpdateException();
+        }
     }
 
     public void deleteFaculty(long id) {
-        facultyRepository.deleteById(id);
+        try {
+            repository.deleteById(id);
+        } catch (RuntimeException e) {
+            throw new UnableToDeleteException();
+        }
     }
 
     public Collection<Faculty> getAllFaculties() {
-        return facultyRepository.findAll();
+        return repository.findAll();
     }
 
-    public List<Faculty> findByColor(String color) {
-        return facultyRepository.findByColor(color);
+    public Collection<Faculty> findByColorOrName(String color, String name) {
+        if (color == null && name == null) {
+            throw new BadRequestException();
+        }
+        Collection<Faculty> faculties =
+                repository.findFacultiesByColorIgnoreCaseOrNameIgnoreCase(color, name);
+        if (faculties.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return faculties;
     }
+
 }

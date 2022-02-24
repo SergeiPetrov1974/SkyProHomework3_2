@@ -1,6 +1,6 @@
 package ru.hogwarts.school.controller;
 
-import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.service.FacultyService;
@@ -22,7 +22,7 @@ public class FacultyController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Faculty> getFacultyInfo(@PathVariable long id) {
+    public Faculty getFacultyInfo(@PathVariable Long id) {
         return facultyService.findFaculty(id);
     }
 
@@ -32,7 +32,7 @@ public class FacultyController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteFaculty(@PathVariable long id) {
+    public void deleteFaculty(@PathVariable Long id) {
         facultyService.deleteFaculty(id);
     }
 
@@ -41,8 +41,9 @@ public class FacultyController {
         return facultyService.getAllFaculties();
     }
 
-    @GetMapping("/color/{color}")
-    public Collection<Faculty> filterFacultiesByColor(@PathVariable String color) {
-        return facultyService.findByColor(color);
+    @GetMapping("find")
+    public Collection<Faculty> findFacultyByColorOrName(@RequestParam(required = false) String color,
+                                                        @RequestParam(required = false) String name) {
+        return facultyService.findByColorOrName(color, name);
     }
 }
